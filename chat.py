@@ -6,14 +6,14 @@ import chromadb
 from typing import List
 import google.generativeai as genai
 from chromadb import Documents, EmbeddingFunction, Embeddings
-import fitz  # PyMuPDF (for PDF handling)
-import datetime  # For generating dynamic collection name
-import uuid      # Alternative for unique identifier
+import fitz  
+import datetime  
+import uuid     
 from pymongo import MongoClient
 import io
 
 
-os.environ["GEMINI_API_KEY"] = "AIzaSyCjQihAK86WBUqnDzycuTWpE7gMZvOqJik"
+os.environ["GEMINI_API_KEY"] = "YOU_API_KEY"
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -21,8 +21,8 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'txt', 'docx'}
 
 # Configure MongoDB connection
 mongo_client = MongoClient("mongodb://localhost:27017/")  # Update with your MongoDB URI
-db = mongo_client['your_database_name']  # Replace with your MongoDB database name
-file_collection = db['file_storage']
+db = mongo_client['RAG']  # Replace with your MongoDB database name
+file_collection = db['files']
 chroma_collection_metadata = db['chroma_collection_metadata']
 
 # Global variable to store the name of the latest collection
@@ -91,6 +91,8 @@ def get_relevant_passage(query: str, db, n_results: int):
     passages = db.query(query_texts=[query], n_results=n_results)['documents']
     return passages[0] if passages else []
 
+
+
 # Create RAG prompt
 def make_rag_prompt(query: str, relevant_passage: str) -> str:
     escaped = relevant_passage.replace("'", "").replace('"', "").replace("\n", " ")
@@ -139,6 +141,10 @@ def extract_text_from_pdf(file_content):
         for page in doc:
             pdf_text += page.get_text()
     return pdf_text
+
+
+#Routes { Upload document, get response from the chat}
+
 
 @app.route("/")
 def index():
